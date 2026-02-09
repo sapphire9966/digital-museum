@@ -4,20 +4,32 @@
     <el-header class="site-header" height="64px">
       <div class="header-inner">
         <span class="logo">数字博物馆</span>
-        <el-menu
-          mode="horizontal"
-          :default-active="activeMenu"
-          class="nav-menu"
-          background-color="transparent"
-          text-color="rgba(255,255,255,0.88)"
-          active-text-color="var(--museum-gold)"
-          @select="onMenuSelect"
-        >
-          <el-menu-item index="/">首页</el-menu-item>
-          <el-menu-item index="#exhibitions">展览</el-menu-item>
-          <el-menu-item index="#collections">藏品</el-menu-item>
-          <el-menu-item index="#about">关于我们</el-menu-item>
-        </el-menu>
+        <div class="header-nav-wrap">
+          <el-menu
+            mode="horizontal"
+            :ellipsis="false"
+            :default-active="activeMenu"
+            class="nav-menu"
+            background-color="transparent"
+            text-color="rgba(255,255,255,0.88)"
+            active-text-color="var(--museum-gold)"
+            @select="onMenuSelect"
+          >
+            <el-menu-item index="/">首页</el-menu-item>
+            <el-menu-item index="#collections">藏品</el-menu-item>
+            <el-menu-item index="#learning">探索</el-menu-item>
+          </el-menu>
+          <div class="header-user" @click="onUserClick">
+          <el-avatar v-if="isLoggedIn" :src="userAvatar" :size="36">
+            {{ userAvatar ? '' : (userName || '用').charAt(0) }}
+          </el-avatar>
+          <div v-else class="user-icon-default" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+        </div>
+        </div>
       </div>
     </el-header>
 
@@ -56,7 +68,12 @@
             :md="8"
             :lg="8"
           >
-            <el-card shadow="hover" class="exhibition-card" :style="{ '--delay': i }">
+            <el-card
+              shadow="hover"
+              class="exhibition-card"
+              :style="{ '--delay': i }"
+              @click="goExhibitionDetail(item)"
+            >
               <div class="card-image">
                 <span class="placeholder-text">{{ item.title.charAt(0) }}</span>
               </div>
@@ -64,7 +81,6 @@
                 <span class="card-title">{{ item.title }}</span>
               </template>
               <p class="card-desc">{{ item.desc }}</p>
-              <el-button type="primary" link class="card-link-btn">查看详情</el-button>
             </el-card>
           </el-col>
         </el-row>
@@ -97,8 +113,6 @@
           </el-col>
         </el-row>
       </section>
-
-      <!-- 关于我们 -->
       <section id="about" class="section section-about">
         <div class="section-head">
           <span class="section-label">ABOUT</span>
@@ -128,9 +142,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const activeMenu = ref('/')
+const isLoggedIn = ref(false)
+const userAvatar = ref('')
+const userName = ref('')
+
+function onUserClick() {
+  if (isLoggedIn.value) {
+    // 已登入可展开用户菜单（后续可做下拉）
+    return
+  }
+  activeMenu.value = '#login'
+  scrollTo('#login')
+}
 
 const exhibitions = [
   { id: 1, title: '古代青铜器专题', desc: '从夏商周到秦汉，领略青铜文明的辉煌。' },
@@ -146,6 +174,10 @@ const collections = [
   { id: 5, name: '陶俑', era: '唐代' },
   { id: 6, name: '漆器', era: '汉代' },
 ]
+
+function goExhibitionDetail(item: (typeof exhibitions)[number]) {
+  router.push({ name: 'exhibition-detail', params: { id: item.id } })
+}
 
 function scrollTo(selector: string) {
   const el = document.querySelector(selector)
@@ -207,6 +239,12 @@ onMounted(() => {
   justify-content: space-between;
 }
 
+.header-nav-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .logo {
   font-family: var(--font-serif);
   font-size: 1.35rem;
@@ -227,6 +265,31 @@ onMounted(() => {
 
 .nav-menu.el-menu--horizontal > .el-menu-item:hover {
   color: var(--museum-gold-light) !important;
+}
+
+.header-user {
+  margin-left: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.88);
+}
+.header-user:hover {
+  color: var(--museum-gold-light);
+}
+.user-icon-default {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.88);
+}
+.header-user:hover .user-icon-default {
+  background: rgba(201, 169, 98, 0.25);
+  color: var(--museum-gold-light);
 }
 
 /* ---------- 主内容 ---------- */
@@ -338,10 +401,6 @@ onMounted(() => {
   margin: 0;
 }
 
-.section-exhibitions {
-  background: #fff;
-}
-
 .section-collections {
   background: linear-gradient(180deg, #faf8f5 0%, #f5f0e8 100%);
 }
@@ -355,12 +414,54 @@ onMounted(() => {
   margin-top: 0;
 }
 
+.exhibition-detail-layout {
+  align-items: center;
+}
+
+.exhibition-detail-image {
+  border-radius: 16px;
+  background: radial-gradient(circle at 30% 20%, rgba(201, 169, 98, 0.18), transparent 60%),
+    #12100e;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 4rem;
+}
+
+.exhibition-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exhibition-detail-desc {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--el-text-color-regular);
+}
+
+.exhibition-detail-meta {
+  font-size: 0.9rem;
+  color: var(--el-text-color-secondary);
+}
+
+.exhibition-detail-meta p {
+  margin: 4px 0;
+}
+
+.exhibition-detail-btn {
+  margin-top: 8px;
+}
+
 /* ---------- 展览卡片 ---------- */
 .exhibition-card {
   margin-bottom: 0;
   border-radius: 12px;
   border: 1px solid var(--el-border-color-lighter);
   overflow: hidden;
+  cursor: pointer;
   transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.3s ease;
   animation: fadeUp 0.6s ease backwards;
   animation-delay: calc(0.1s * var(--delay, 0));
