@@ -1,38 +1,5 @@
 <template>
   <el-container class="museum-home" direction="vertical">
-    <!-- 顶部导航 -->
-    <el-header class="site-header" height="64px">
-      <div class="header-inner">
-        <span class="logo">数字博物馆</span>
-        <div class="header-nav-wrap">
-          <el-menu
-            mode="horizontal"
-            :ellipsis="false"
-            :default-active="activeMenu"
-            class="nav-menu"
-            background-color="transparent"
-            text-color="rgba(255,255,255,0.88)"
-            active-text-color="var(--museum-gold)"
-            @select="onMenuSelect"
-          >
-            <el-menu-item index="/">首页</el-menu-item>
-            <el-menu-item index="#collections">藏品</el-menu-item>
-            <el-menu-item index="#learning">探索</el-menu-item>
-          </el-menu>
-          <div class="header-user" @click="onUserClick">
-          <el-avatar v-if="isLoggedIn" :src="userAvatar" :size="36">
-            {{ userAvatar ? '' : (userName || '用').charAt(0) }}
-          </el-avatar>
-          <div v-else class="user-icon-default" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-          </div>
-        </div>
-        </div>
-      </div>
-    </el-header>
-
     <!-- 主内容 -->
     <el-main class="main-content">
       <!-- 主视觉区 -->
@@ -126,18 +93,6 @@
         </el-card>
       </section>
     </el-main>
-
-    <!-- 页脚 -->
-    <el-footer class="site-footer" height="auto">
-      <div class="footer-inner">
-        <p class="copyright">© {{ new Date().getFullYear() }} 数字博物馆 版权所有</p>
-        <div class="footer-links">
-          <el-link type="info" :underline="false" href="#">联系我们</el-link>
-          <el-link type="info" :underline="false" href="#">使用说明</el-link>
-          <el-link type="info" :underline="false" href="#">隐私政策</el-link>
-        </div>
-      </div>
-    </el-footer>
   </el-container>
 </template>
 
@@ -147,15 +102,8 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const activeMenu = ref('/')
-const isLoggedIn = ref(false)
-const userAvatar = ref('')
-const userName = ref('')
 
 function onUserClick() {
-  if (isLoggedIn.value) {
-    // 已登入可展开用户菜单（后续可做下拉）
-    return
-  }
   activeMenu.value = '#login'
   scrollTo('#login')
 }
@@ -184,18 +132,8 @@ function scrollTo(selector: string) {
   el?.scrollIntoView({ behavior: 'smooth' })
 }
 
-function onMenuSelect(index: string) {
-  activeMenu.value = index
-  if (index.startsWith('#')) {
-    scrollTo(index)
-  }
-}
-
 onMounted(() => {
-  const hash = window.location.hash
-  if (hash) {
-    activeMenu.value = hash
-  }
+  console.log('HomeView mounted')
 })
 </script>
 
@@ -213,89 +151,10 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-/* ---------- 头部 ---------- */
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: rgba(18, 16, 14, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--museum-border);
-  display: flex;
-  align-items: center;
-  transition: background 0.3s ease;
-}
-
-.header-inner {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-nav-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo {
-  font-family: var(--font-serif);
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--museum-cream);
-  letter-spacing: 0.12em;
-}
-
-.nav-menu {
-  border-bottom: none !important;
-}
-
-.nav-menu.el-menu--horizontal > .el-menu-item {
-  border-bottom: none !important;
-  font-size: 0.95rem;
-  letter-spacing: 0.06em;
-}
-
-.nav-menu.el-menu--horizontal > .el-menu-item:hover {
-  color: var(--museum-gold-light) !important;
-}
-
-.header-user {
-  margin-left: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.88);
-}
-.header-user:hover {
-  color: var(--museum-gold-light);
-}
-.user-icon-default {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.88);
-}
-.header-user:hover .user-icon-default {
-  background: rgba(201, 169, 98, 0.25);
-  color: var(--museum-gold-light);
-}
-
 /* ---------- 主内容 ---------- */
 .main-content {
   padding: 0;
-  margin-top: 64px;
+  margin-top: 0; /* 移除重复的margin-top，避免与App.vue中的设置叠加 */
   min-height: calc(100vh - 140px);
 }
 
@@ -597,42 +456,6 @@ onMounted(() => {
   letter-spacing: 0.03em;
 }
 
-/* ---------- 页脚 ---------- */
-.site-footer {
-  background: var(--museum-darker);
-  border-top: 1px solid var(--museum-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 24px;
-}
-
-.footer-inner {
-  text-align: center;
-}
-
-.copyright {
-  font-size: 0.85rem;
-  color: rgba(245, 240, 232, 0.6);
-  margin: 0 0 10px;
-  letter-spacing: 0.02em;
-}
-
-.footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-}
-
-.footer-links .el-link {
-  color: rgba(245, 240, 232, 0.6) !important;
-  font-size: 0.85rem;
-  letter-spacing: 0.03em;
-}
-
-.footer-links .el-link:hover {
-  color: var(--museum-gold-light) !important;
-}
 
 /* ---------- 动效 ---------- */
 @keyframes fadeUp {
